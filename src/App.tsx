@@ -1,25 +1,30 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import RouterComponent from './router';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: 'rgb(26 41 124)',
+    },
+    secondary: {
+      main: '#ff471b',
+    }
+  },
+});
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <RouterComponent />
+        </BrowserRouter>
+      </ThemeProvider>
+    </LocalizationProvider>
   );
 }
 
