@@ -1,14 +1,10 @@
 import React from "react"
-import { Box } from "@mui/material";
-//import { useNavigate } from "react-router-dom";
 
 const EmptyLayout: React.FC<any> = ({ children }) => {
-    //const navigate = useNavigate();
-
     return (
-        <Box>
+        <div className="flex items-center justify-center" style={{ minWidth: "100vw", minHeight: "100vh" }}>
             { children }
-        </Box>
+        </div>
     )
 }
 

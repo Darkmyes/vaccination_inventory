@@ -1,19 +1,19 @@
 import * as React from 'react';
 import { Button, OutlinedInput, InputAdornment, IconButton, Card, CardContent, InputLabel, FormControl, Snackbar, Slide, Alert, Modal, CircularProgress } from "@mui/material";
+import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import Visibility from '@mui/icons-material/Visibility';
-import EmptyLayout from '../layouts/empty_layout';
+import MainLayout from '../../../layouts/main_layout';
 import { Person, Lock } from '@mui/icons-material';
-import { UserFakeAPIRepo } from '../user/repository/fake_api';
-import { AuthUserUC } from '../user/usecase/auth_usecase';
+import { UserFakeAPIRepo } from '../../repository/fake_api';
+import { AdminUserUC } from '../../usecase/admin_usecase';
 import { Box } from '@mui/system';
+import { User } from '../../../domain/user';
 
 const userRepo = new UserFakeAPIRepo();
-const authUserUC = new AuthUserUC(userRepo);
+const adminUserUC = new AdminUserUC(userRepo);
 
-interface LoginState {
+interface AdminState {
     username: string,
     password: string,
     showPassword: boolean
@@ -23,15 +23,15 @@ function TransitionDown(props: any) {
     return <Slide {...props} direction="down" />;
 }
 
-const LoginPage = () => {
+const AdminPage = () => {
     const navigate = useNavigate()
 
-    const [values, setValues] = React.useState<LoginState>({
+    const [values, setValues] = React.useState<AdminState>({
         username: "",
         password: "",
         showPassword: false
     });
-    const handleChange = (prop: keyof LoginState) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (prop: keyof AdminState) => (event: React.ChangeEvent<HTMLInputElement>) => {
         setValues({ ...values, [prop]: event.target.value });
     };
 
@@ -45,19 +45,6 @@ const LoginPage = () => {
         event.preventDefault();
     };
 
-    const handleLoginButton = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        setLoaderModalVisibility(true)
-        const user = await authUserUC.login(values.username, values.password)
-        setLoaderModalVisibility(false)
-
-        if (user != null) {
-            navigate("/admin")
-        } else {
-            setSnackbarVisibility(true)
-        }
-    };
-
     const [snackbarVisibility, setSnackbarVisibility] = React.useState<boolean>(false);
     const handleCloseSnackbar = () => {
         setSnackbarVisibility(false);
@@ -65,9 +52,73 @@ const LoginPage = () => {
 
     const [loaderModalVisibility, setLoaderModalVisibility] = React.useState<boolean>(false);
 
+    const userColumns: GridColDef[] = [
+        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'name', headerName: 'Name', width: 130 },
+        { field: 'lastname', headerName: 'Last name', width: 130 },
+        { field: 'email', headerName: 'Email', width: 130 },
+        { field: 'username', headerName: 'Username', width: 130 },
+    ];
+    const [users, setUsers] = React.useState<User[]>([]);
+
+    const getUsers = async() => {
+        const users = await adminUserUC.list();
+        setUsers(users);
+    }
+
+    const getAdmins = async() => {
+        const users = await adminUserUC.listAdmins();
+        setUsers(users);
+    }
+
+    const getEmployees = async() => {
+        const users = await adminUserUC.listEmployees();
+        setUsers(users);
+    }
+
+    React.useEffect( () => {
+        getUsers();
+    })
+
     return (
-        <EmptyLayout>
-            <Card>
+        <MainLayout>
+            <div className='flex items-center justify-between'>
+                <h1>Users</h1>
+                <div className='flex items-center justify-between'>
+                    <Button
+                        sx={{ m: 1 }}
+                        variant="contained"
+                        color='success'
+                    >
+                        Add
+                    </Button>
+                    <Button
+                        sx={{ m: 1 }}
+                        variant="contained"
+                        color='warning'
+                    >
+                        Edit
+                    </Button>
+                    <Button
+                        sx={{ m: 1 }}
+                        variant="contained"
+                        color='error'
+                    >
+                        Delete
+                    </Button>
+                </div>
+            </div>
+            <div style={{ minHeight: "400px", height: 400, width: '100%' }}>
+                <DataGrid
+                    rows={users}
+                    columns={userColumns}
+                    pageSize={5}
+                    rowsPerPageOptions={[5]}
+                    checkboxSelection
+                />
+            </div>
+
+            {/* <Card>
                 <CardContent className='flex column items-center'>
                     <div className='p-xs text-center'>
                         <h1>Vaccination Inventory</h1>
@@ -118,13 +169,12 @@ const LoginPage = () => {
                         <Button
                             variant="contained"
                             color='success'
-                            onClick={handleLoginButton}
                         >
-                            Login
+                            Admin
                         </Button>
                     </FormControl>
                 </CardContent>
-            </Card>
+            </Card> */}
 
             <Snackbar
                 anchorOrigin={{ vertical: "top", horizontal: "center" }}
@@ -149,8 +199,8 @@ const LoginPage = () => {
                     <CircularProgress variant="indeterminate" sx={{ color: "white" }}/>
                 </Box>
             </Modal>
-        </EmptyLayout>
+        </MainLayout>
     )
 }
 
-export default LoginPage
+export default AdminPage

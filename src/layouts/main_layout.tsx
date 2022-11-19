@@ -1,14 +1,16 @@
 import React from "react"
-import { Box } from "@mui/material";
+import { Box, Container } from "@mui/material";
 //import { useNavigate } from "react-router-dom";
 
 const MainLayout: React.FC<any> = ({ children }) => {
     //const navigate = useNavigate();
 
     return (
-        <Box>
-            { children }
-        </Box>
+        <Container>
+            <Box sx={{ p: 2 }}>
+                { children }
+            </Box>
+        </Container>
     )
 }
 

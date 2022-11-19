@@ -42,7 +42,10 @@ export class User {
 
 export interface UserRepository {
     list() : Promise<User[]>;
+    listAdmins() : Promise<User[]>;
+    listEmployees() : Promise<User[]>;
     byID(id: number) : Promise<User | null>;
+    login(username: string, password: string) : Promise<User | null>;
     
     /* byVaccineState (state: boolean) : Promise<User[]>; */
 
@@ -53,8 +56,16 @@ export interface UserRepository {
     updateEmployeeData(User: User) : Promise<boolean>;
 }
 
-export interface AdminUserUseCase {
+export interface AuthUserUsecase {
+    login (username: string, password: string): Promise<User | null>;
+    logout (): Promise<boolean>;
+    getUserByToken (): Promise<User | null>;
+}
+
+export interface AdminUserUsecase {
     list() : Promise<User[]>;
+    listAdmins() : Promise<User[]>;
+    listEmployees() : Promise<User[]>;
     byID(id: number) : Promise<User | null>;
 
     /* byVaccineState (state: boolean) : Promise<User[]>;

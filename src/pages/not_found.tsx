@@ -1,19 +1,10 @@
 import * as React from 'react';
 import { Box, Button } from "@mui/material";
 
-import './Error_404_Not_Found.css'
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 
 const NotFoundPage = () => {
     const navigate = useNavigate()
-
-    /* useEffect(() => {
-        setTimeout(() => {
-            document.querySelector('.cont_principal')
-                .className = "cont_principal cont_error_active";
-        }, 20)
-    }); */
 
     return (
         <Box className="cont_principal">
