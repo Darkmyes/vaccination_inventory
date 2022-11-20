@@ -4,11 +4,12 @@ import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
 import { useNavigate } from 'react-router-dom';
 
 import MainLayout from '../../../layouts/main_layout';
-import { Person, Lock } from '@mui/icons-material';
+import { Person, Lock, Delete, Edit, Add } from '@mui/icons-material';
 import { UserFakeAPIRepo } from '../../repository/fake_api';
 import { AdminUserUC } from '../../usecase/admin_usecase';
 import { Box } from '@mui/system';
 import { User } from '../../../domain/user';
+import ModalAdd from '../components/modal_add';
 
 const userRepo = new UserFakeAPIRepo();
 const adminUserUC = new AdminUserUC(userRepo);
@@ -50,7 +51,9 @@ const AdminPage = () => {
         setSnackbarVisibility(false);
     };
 
-    const [loaderModalVisibility, setLoaderModalVisibility] = React.useState<boolean>(false);
+    const [addModalVisibility, setAddModalVisibility] = React.useState<boolean>(false);
+    const [editModalVisibility, setEditModalVisibility] = React.useState<boolean>(false);
+    const [deleteModalVisibility, setDeleteModalVisibility] = React.useState<boolean>(false);
 
     const userColumns: GridColDef[] = [
         { field: 'id', headerName: 'ID', width: 70 },
@@ -78,7 +81,7 @@ const AdminPage = () => {
 
     React.useEffect( () => {
         getUsers();
-    })
+    }, [])
 
     return (
         <MainLayout>
@@ -87,22 +90,29 @@ const AdminPage = () => {
                 <div className='flex items-center justify-between'>
                     <Button
                         sx={{ m: 1 }}
+                        size="small"
                         variant="contained"
                         color='success'
+                        onClick={() => setAddModalVisibility(true)}
+                        startIcon={<Edit />}
                     >
                         Add
                     </Button>
                     <Button
                         sx={{ m: 1 }}
+                        size="small"
                         variant="contained"
                         color='warning'
+                        startIcon={<Add />}
                     >
                         Edit
                     </Button>
                     <Button
                         sx={{ m: 1 }}
+                        size="small"
                         variant="contained"
                         color='error'
+                        startIcon={<Delete />}
                     >
                         Delete
                     </Button>
@@ -118,87 +128,10 @@ const AdminPage = () => {
                 />
             </div>
 
-            {/* <Card>
-                <CardContent className='flex column items-center'>
-                    <div className='p-xs text-center'>
-                        <h1>Vaccination Inventory</h1>
-                    </div>
-                    <FormControl fullWidth sx={{ m: 1 }}>
-                        <InputLabel htmlFor="outlined-adornment-username">Username</InputLabel>
-                        <OutlinedInput
-                            id="outlined-adornment-username"
-                            type="text"
-                            value={values.username}
-                            onChange={handleChange('username')}
-                            startAdornment={
-                                <InputAdornment position="start">
-                                    <Person></Person>
-                                </InputAdornment>
-                            }
-                            label="Username"
-                        />
-                    </FormControl>
-                    <FormControl fullWidth sx={{ m: 1 }}>
-                        <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
-                        <OutlinedInput
-                            id="outlined-adornment-password"
-                            type={values.showPassword ? 'text' : 'password'}
-                            value={values.password}
-                            onChange={handleChange('password')}
-                            startAdornment={
-                                <InputAdornment position="start">
-                                    <Lock></Lock>
-                                </InputAdornment>
-                            }
-                            endAdornment={
-                                <InputAdornment position="end">
-                                    <IconButton
-                                        aria-label="toggle password visibility"
-                                        onClick={handleClickShowPassword}
-                                        onMouseDown={handleMouseDownPassword}
-                                        edge="end"
-                                    >
-                                    {values.showPassword ? <VisibilityOff /> : <Visibility />}
-                                    </IconButton>
-                                </InputAdornment>
-                            }
-                            label="Password"
-                        />
-                    </FormControl>
-                    <FormControl sx={{ m: 1 }}>
-                        <Button
-                            variant="contained"
-                            color='success'
-                        >
-                            Admin
-                        </Button>
-                    </FormControl>
-                </CardContent>
-            </Card> */}
-
-            <Snackbar
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                open={snackbarVisibility}
-                onClose={handleCloseSnackbar}
-                autoHideDuration={2000}
-                key="topCenterSnackbar"
-                TransitionComponent={TransitionDown}
-            >
-                <Alert severity="error">Error: Wrong username or password"!</Alert>
-            </Snackbar>
-
-            <Modal
-                open={loaderModalVisibility}
-                >
-                <Box sx={{
-                    position: 'absolute' as 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)'
-                }}>
-                    <CircularProgress variant="indeterminate" sx={{ color: "white" }}/>
-                </Box>
-            </Modal>
+            <ModalAdd
+                visibility={addModalVisibility}
+                handleVisibility={setAddModalVisibility}
+            ></ModalAdd>
         </MainLayout>
     )
 }

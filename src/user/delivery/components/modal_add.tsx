@@ -1,13 +1,12 @@
 import * as React from 'react';
-import { Button, OutlinedInput, InputAdornment, IconButton, Card, CardContent, InputLabel, FormControl, Snackbar, Slide, Alert, Modal, CircularProgress, Badge } from "@mui/material";
-
+import { Button, OutlinedInput, InputAdornment, Card, IconButton, CardContent, InputLabel, FormControl, Snackbar, Slide, Alert, Modal, CircularProgress, CardActions, Typography, CardHeader, Divider, Select, MenuItem, SelectChangeEvent, Grid } from "@mui/material";
 import { RolFakeAPIRepo } from '../../../rol/repository/fake_api';
 import { UserFakeAPIRepo } from '../../repository/fake_api';
 import { AdminUserUC } from '../../usecase/admin_usecase';
-import { Box } from '@mui/system';
 import { User } from '../../../domain/user';
 import { Rol } from '../../../domain/rol';
-import { Email, TextFields } from '@mui/icons-material';
+import { Badge, Close, Email, SupervisedUserCircle, TextFields } from '@mui/icons-material';
+import { minWidth } from '@mui/system';
 
 const rolRepo = new RolFakeAPIRepo();
 
@@ -24,6 +23,10 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
         new User("", "", "", "", defaultRoleId)
     );
     const handleChange = (prop: keyof User) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUserFormData({ ...userFormData, [prop]: event.target.value });
+    };
+
+    const handleChangeSelect = (prop: keyof User) => (event: SelectChangeEvent) => {
         setUserFormData({ ...userFormData, [prop]: event.target.value });
     };
 
@@ -48,18 +51,32 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
                 setRoles(roles);
             })
             .catch(err => console.log(err))
-    })
+    }, [])
 
     return (
         <Modal
             open={props.visibility}
             onClose={() => props.handleVisibility(false)}
         >
-            <Card>
-                <CardContent className='flex column items-center'>
-                    <div className='p-xs text-center'>
-                        <h1>Vaccination Inventory</h1>
-                    </div>
+            <Card
+                sx={{
+                    position: 'absolute' as 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    minWidth: '275px'
+                }}
+            >
+                <CardHeader
+                    action={
+                        <IconButton onClick={() => props.handleVisibility(false) }>
+                            <Close></Close>
+                        </IconButton>
+                    }
+                    title="Register User"
+                />
+                <Divider />
+                {/* <CardContent className='flex column items-center'>
                     <FormControl fullWidth sx={{ m: 1 }}>
                         <InputLabel htmlFor="outlined-adornment-ci">CI</InputLabel>
                         <OutlinedInput
@@ -120,37 +137,136 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
                             label="Email"
                         />
                     </FormControl>
-                    {/* <FormControl fullWidth sx={{ m: 1 }}>
+                    <FormControl fullWidth sx={{ m: 1 }}>
                         <InputLabel htmlFor="outlined-adornment-rol">Rol</InputLabel>
-                        <OutlinedInput
-                            id="outlined-adornment-rol"
-                            type="text"
-                            value={userFormData.rolId}
-                            onChange={handleChange('rolId')}
+                        <Select
+                            labelId="demo-simple-select-rol"
+                            id="demo-simple-rol"
+                            label="Rol"
+                            value={userFormData.rolId.toString()}
+                            onChange={handleChangeSelect('rolId')}
                             startAdornment={
                                 <InputAdornment position="start">
-                                    Tt
+                                    <SupervisedUserCircle></SupervisedUserCircle>
                                 </InputAdornment>
                             }
-                            label="Rol"
-                        />
-                    </FormControl> */}
-                    <FormControl sx={{ m: 1 }}>
-                        <Button
-                            variant="contained"
-                            color='error'
-                            onClick={() => props.handleVisibility(false) }
                         >
-                            Cancel
-                        </Button>
-                        <Button
-                            variant="contained"
-                            color='success'
-                        >
-                            Register
-                        </Button>
+                            {
+                                roles.map(rol => <MenuItem value={rol.id}>{rol.name}</MenuItem>)
+                            }
+                        </Select>
                     </FormControl>
+                </CardContent> */}
+                <CardContent className='flex column items-center'>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} md={6}>
+                            <FormControl fullWidth>
+                                <InputLabel htmlFor="outlined-adornment-ci">CI</InputLabel>
+                                <OutlinedInput
+                                    id="outlined-adornment-ci"
+                                    type="number"
+                                    value={userFormData.ci}
+                                    onChange={handleChange('ci')}
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <Badge></Badge>
+                                        </InputAdornment>
+                                    }
+                                    label="CI"
+                                />
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <FormControl fullWidth>
+                                <InputLabel htmlFor="outlined-adornment-rol">Rol</InputLabel>
+                                <Select
+                                    labelId="demo-simple-select-rol"
+                                    id="demo-simple-rol"
+                                    label="Rol"
+                                    value={userFormData.rolId.toString()}
+                                    onChange={handleChangeSelect('rolId')}
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <SupervisedUserCircle></SupervisedUserCircle>
+                                        </InputAdornment>
+                                    }
+                                >
+                                    {
+                                        roles.map(rol => <MenuItem value={rol.id}>{rol.name}</MenuItem>)
+                                    }
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <FormControl fullWidth>
+                                <InputLabel htmlFor="outlined-adornment-name">Name</InputLabel>
+                                <OutlinedInput
+                                    id="outlined-adornment-name"
+                                    type="text"
+                                    value={userFormData.name}
+                                    onChange={handleChange('name')}
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <TextFields></TextFields>
+                                        </InputAdornment>
+                                    }
+                                    label="Name"
+                                />
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <FormControl fullWidth>
+                                <InputLabel htmlFor="outlined-adornment-name">Last Name</InputLabel>
+                                <OutlinedInput
+                                    id="outlined-adornment-lastname"
+                                    type="text"
+                                    value={userFormData.lastname}
+                                    onChange={handleChange('lastname')}
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <TextFields></TextFields>
+                                        </InputAdornment>
+                                    }
+                                    label="Last Name"
+                                />
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <FormControl fullWidth>
+                                <InputLabel htmlFor="outlined-adornment-name">Email</InputLabel>
+                                <OutlinedInput
+                                    id="outlined-adornment-email"
+                                    type="text"
+                                    value={userFormData.email}
+                                    onChange={handleChange('email')}
+                                    startAdornment={
+                                        <InputAdornment position="start">
+                                            <Email></Email>
+                                        </InputAdornment>
+                                    }
+                                    label="Email"
+                                />
+                            </FormControl>
+                        </Grid>
+                    </Grid>
                 </CardContent>
+                <Divider />
+                <CardActions className='justify-end'>
+                    <Button
+                        color='error'
+                        size="small"
+                        onClick={() => props.handleVisibility(false) }
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="contained"
+                        size="small"
+                        color='success'
+                    >
+                        Register
+                    </Button>
+                </CardActions>
             </Card>
         </Modal>
     )
