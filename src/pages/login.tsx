@@ -65,6 +65,20 @@ const LoginPage = () => {
 
     const [loaderModalVisibility, setLoaderModalVisibility] = React.useState<boolean>(false);
 
+    React.useEffect(() => {
+        authUserUC.getUserByToken()
+            .then(user => {
+                if (user != null) {
+                    if (user.rolId === 1) {
+                        navigate("/admin")
+                    } else {
+                        navigate("/employee")
+                    }
+                }
+            })
+            .catch(err => console.log(err))
+    })
+
     return (
         <EmptyLayout>
             <Card>

@@ -59,20 +59,55 @@ export class UserFakeAPIRepo implements UserRepository {
     }
 
 
-    async register(User: User) : Promise<User | null> {
-        return null
+    async register(user: User) : Promise<User | null> {
+        let users: User[] = JSON.parse(localStorage.getItem("users") || this.defaultUsers) as User[];
+        let maxId: number = 0;
+
+        if (users.length > 0) {
+            maxId = users.reduce((userInArray, maxIdUser) => {
+                return userInArray.id > maxIdUser.id ? userInArray : maxIdUser;
+            }, users[0]).id;
+        }
+
+        user.id = maxId + 1;
+        users.push(user);
+
+        localStorage.setItem("users", JSON.stringify(users));
+        return user
     }
 
-    async update(User: User) : Promise<boolean>{
-        return false
+    async update(user: User) : Promise<boolean> {
+        let users: User[] = JSON.parse(localStorage.getItem("users") || this.defaultUsers) as User[];
+        let userIndex = users.findIndex(userInArray => userInArray.id === user.id)
+        if (userIndex < 0) {
+            return false;
+        }
+
+        users[userIndex] = user;
+        localStorage.setItem("users", JSON.stringify(users));
+
+        return true
     }
     
-    async delete(id: number) : Promise<boolean>{
-        return false
+    async delete(id: number) : Promise<boolean> {
+        let users: User[] = JSON.parse(localStorage.getItem("users") || this.defaultUsers) as User[];
+        users.filter( user => user.id !== id );
+
+        localStorage.setItem("users", JSON.stringify(users));
+        return true
     }
 
 
-    async updateEmployeeData(User: User) : Promise<boolean>{
-        return false
+    async updateEmployeeData(user: User) : Promise<boolean> {
+        let users: User[] = JSON.parse(localStorage.getItem("users") || this.defaultUsers) as User[];
+        let userIndex = users.findIndex(userInArray => userInArray.id === user.id)
+        if (userIndex < 0) {
+            return false;
+        }
+
+        users[userIndex] = user;
+        localStorage.setItem("users", JSON.stringify(users));
+
+        return true
     }
 }

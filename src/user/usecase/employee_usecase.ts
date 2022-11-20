@@ -11,6 +11,6 @@ export class EmployeeUserUC implements EmployeeUserUsecase {
     }
 
     async update(user: User) : Promise<boolean> {
-        return this.userRepo.update(user);
+        return this.userRepo.updateEmployeeData(user);
     }
 }
