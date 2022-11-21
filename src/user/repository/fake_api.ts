@@ -40,9 +40,10 @@ export class UserFakeAPIRepo implements UserRepository {
         let users: User[] = JSON.parse(localStorage.getItem("users") || this.defaultUsers) as User[];
         
         let user = users.find( (user: User) => user.username === username && user.password === password) as User;
-        if (user !== null) {
+        if (user !== null && user !== undefined) {
             return user;
         }
+        console.log(user)
         return null
     }
 

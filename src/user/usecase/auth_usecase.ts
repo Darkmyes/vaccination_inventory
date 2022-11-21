@@ -9,7 +9,8 @@ export class AuthUserUC implements AuthUserUsecase {
 
     async login (username: string, password: string): Promise<User | null> {
         const user = await this.userRepo.login(username, password)
-        if (user !== null) {
+        if (user !== null && user !== undefined) {
+            console.log(user)
             localStorage.setItem("user_token", user.id.toString())
         }
         return user
@@ -27,7 +28,7 @@ export class AuthUserUC implements AuthUserUsecase {
         }
 
         const user = await this.userRepo.byID(parseInt(savedToken))
-        if (user !== null) {
+        if (user !== null && user !== undefined) {
             return user
         }
 

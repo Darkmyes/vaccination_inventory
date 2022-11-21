@@ -82,7 +82,6 @@ const EmployeePage = () => {
         let vaccineSelected = vaccinesSelected.find( vaccineInArray => vaccineInArray.id === selectionModel[0] )        
         setVaccinesSelected(JSON.parse(JSON.stringify(vaccinesSelected)))
 
-        console.log(vaccinesSelected)
         setEditModalVisibility(true)
     }
 
@@ -137,8 +136,6 @@ const EmployeePage = () => {
         }
         vaccineHistory.id = maxId + 1
 
-        console.log(vaccineHistory)
-
         let vaccineHistoryArray = JSON.parse(JSON.stringify(userFormData.vaccineHistory))
         vaccineHistoryArray.push(vaccineHistory)
         setUserFormData({ ...userFormData, ["vaccineHistory"]: vaccineHistoryArray });
@@ -186,7 +183,7 @@ const EmployeePage = () => {
     React.useEffect(() => {
         authUserUC.getUserByToken()
             .then(user => {
-                if (user !== null) {
+                if (user !== null && user !== undefined) {
                     setUserFormData(user as User)
                 }
             })

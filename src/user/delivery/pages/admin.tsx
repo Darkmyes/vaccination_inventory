@@ -140,7 +140,6 @@ const AdminPage = () => {
         let userSelected = users.find( userInArray => userInArray.id === selectionModel[0] )        
         setUserSelected(JSON.parse(JSON.stringify(userSelected)))
 
-        console.log(userSelected)
         setEditModalVisibility(true)
     }
 

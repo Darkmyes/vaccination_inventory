@@ -68,7 +68,6 @@ export class UserValidator {
         if (birthDate === null || birthDate.trim().length === 0) {
             errors.push("The Birth Date is required");
         } else {
-            console.log(birthDate)
             if (!(
                 (/^[0-9]{4}\/[0-9]{1,2}\/[0-9]{1,2}$/).test(birthDate)
                 || (/^[0-9]{4}\-[0-9]{1,2}\-[0-9]{1,2}$/).test(birthDate)
@@ -84,7 +83,6 @@ export class UserValidator {
         if (dateString === null || dateString.trim().length === 0) {
             errors.push("The Vacccination Date is required");
         } else {
-            console.log(dateString)
             if (!(
                 (/^[0-9]{4}\/[0-9]{1,2}\/[0-9]{1,2}$/).test(dateString)
                 || (/^[0-9]{4}\-[0-9]{1,2}\-[0-9]{1,2}$/).test(dateString)

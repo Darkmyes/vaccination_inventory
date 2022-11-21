@@ -51,7 +51,7 @@ const LoginPage = () => {
         const user = await authUserUC.login(values.username, values.password)
         setLoaderModalVisibility(false)
 
-        if (user !== null) {
+        if (user !== null && user !== undefined) {
             navigate("/admin")
         } else {
             setSnackbarVisibility(true)
@@ -68,7 +68,7 @@ const LoginPage = () => {
     React.useEffect(() => {
         authUserUC.getUserByToken()
             .then(user => {
-                if (user !== null) {
+                if (user !== null && user !== undefined) {
                     if (user.rolId === 1) {
                         navigate("/admin")
                     } else {

@@ -29,7 +29,6 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
     };
     const handleChangeSelect = (prop: keyof VaccineHistory) => (event: SelectChangeEvent) => {
         let vaccine = vaccines.find(vaccineInArray => vaccineInArray.id === parseInt(event.target.value))
-        console.log(vaccine)
         setVaccineHistoryFormData({ ...vaccinehistoryFormData, [prop]: event.target.value, ["vaccine"]: vaccine });
     };
 
