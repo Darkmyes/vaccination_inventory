@@ -10,6 +10,7 @@ import MainLayout from '../../../layouts/main_layout';
 import { DataGrid, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
 import { VaccineHistory } from '../../../domain/vaccine_history';
 import ModalVaccinationAdd from '../components/modal_vaccination_add';
+import ModalVaccinationDelete from '../components/modal_vaccination_delete';
 
 const userRepo = new UserFakeAPIRepo();
 const authUserUC = new AuthUserUC(userRepo);
@@ -32,26 +33,27 @@ const EmployeePage = () => {
         new User("", "", "", "", defaultRoleId)
     );
     const handleChange = (prop: keyof User) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (prop === 'ci' && !(/^[0-9]+$/).test(event.target.value) && event.target.value !== "") {
+        if (prop === 'phoneNumber' && !(/^[0-9]+$/).test(event.target.value) && event.target.value !== "") {
             setUserFormData({ ...userFormData });
             return
         }
 
         if (prop === 'vaccineState') {
+            if (userFormData.vaccineHistory.length > 0) {
+                setUserFormData({ ...userFormData });
+                return
+            }
             setUserFormData({ ...userFormData, [prop]: !userFormData.vaccineState });
             return
         }
 
         setUserFormData({ ...userFormData, [prop]: event.target.value });
     };
-    const handleChangeSelect = (prop: keyof User) => (event: SelectChangeEvent) => {
-        setUserFormData({ ...userFormData, [prop]: event.target.value });
-    };
 
     const vaccineHistoryColumns: GridColDef[] = [
         { field: 'id', headerName: 'ID', width: 70 },
         { field: 'dosisNumber', headerName: 'Dosis Number', width: 130 },
-        { field: 'vaccine.name', headerName: 'Vaccine', width: 130 },
+        { field: 'vaccine', valueParser: (row: VaccineHistory) => { return row.vaccine != null ? row.vaccine.name : "-" } , headerName: 'Vaccine', width: 130 },
         { field: 'vaccinationDate', headerName: 'Date', width: 130 },
     ];
 
@@ -134,6 +136,29 @@ const EmployeePage = () => {
         }
     }
 
+    const handleAddVaccineHistory = (vaccineHistory: VaccineHistory) => {
+        let maxId: number = 0;
+        if (userFormData.vaccineHistory.length > 0) {
+            maxId = userFormData.vaccineHistory.reduce((vaccineHistoryInArray, maxIdVaccineHistory) => {
+                return vaccineHistory.id > maxIdVaccineHistory.id ? vaccineHistoryInArray : maxIdVaccineHistory;
+            }, userFormData.vaccineHistory[0]).id;
+        }
+        vaccineHistory.id = maxId + 1
+
+        console.log(vaccineHistory)
+
+        let vaccineHistoryArray = JSON.parse(JSON.stringify(userFormData.vaccineHistory))
+        vaccineHistoryArray.push(vaccineHistory)
+        setUserFormData({ ...userFormData, ["vaccineHistory"]: vaccineHistoryArray });
+    }
+
+    const handleDeleteVaccineHistory = () => {
+        let vaccineHistoryArray = JSON.parse(JSON.stringify(userFormData.vaccineHistory))
+        vaccineHistoryArray = vaccineHistoryArray.filter((vaccine: VaccineHistory) => !selectionModel.includes(vaccine.id))
+        setUserFormData({ ...userFormData, ["vaccineHistory"]: vaccineHistoryArray });
+        setSelectionModel([]);
+    }
+
     const handleSaveButton = async () => {
         validateUserForErrors()
 
@@ -184,8 +209,15 @@ const EmployeePage = () => {
             <ModalVaccinationAdd
                 visibility={addModalVisibility}
                 handleVisibility={setAddModalVisibility}
-                handleFinishAction={() => {}}
+                handleFinishAction={handleAddVaccineHistory}
             ></ModalVaccinationAdd>
+
+            <ModalVaccinationDelete
+                visibility={deleteModalVisibility}
+                handleVisibility={setDeleteModalVisibility}
+                vaccineHistories={userFormData.vaccineHistory}
+                handleFinishAction={handleDeleteVaccineHistory}
+            ></ModalVaccinationDelete>
 
             <TopSnackbar
                 message={snackbarMessage}
@@ -362,6 +394,7 @@ const EmployeePage = () => {
                                             </InputAdornment>
                                         }
                                         label="Phone Number"
+                                        inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 10 }}
                                         error={validationErrors.lastname.length > 0}
                                     />
                                     {
@@ -425,21 +458,21 @@ const EmployeePage = () => {
                                     >
                                         Add
                                     </Button>
-                                    <Button
+                                    {/* <Button
                                         sx={{ m: 1 }}
                                         variant="contained"
                                         color='warning'
-                                        /* onClick={openEditModal} */
+                                        onClick={openEditModal}
                                         startIcon={<Edit />}
                                         disabled={selectionModel.length !== 1}
                                     >
                                         Edit
-                                    </Button>
+                                    </Button> */}
                                     <Button
                                         sx={{ m: 1 }}
                                         variant="contained"
                                         color='error'
-                                        /* onClick={openDeleteModal} */
+                                        onClick={openDeleteModal}
                                         startIcon={<Delete />}
                                         disabled={selectionModel.length === 0}
                                     >
@@ -447,19 +480,22 @@ const EmployeePage = () => {
                                     </Button>
                                 </div>
                             </Grid>
-                            <Grid item xs={12} style={{ minHeight: "300px", height: 300 }}>
-                                <DataGrid
-                                    rows={userFormData.vaccineHistory}
-                                    columns={vaccineHistoryColumns}
-                                    pageSize={5}
-                                    rowsPerPageOptions={[5]}
-                                    checkboxSelection
-                                    selectionModel={selectionModel}
-                                    onSelectionModelChange={(newSelectionModel) => {
-                                        setSelectionModel(newSelectionModel);
-                                    }}
-                                />
-                            </Grid>
+                            {
+                                !userFormData.vaccineState ? <div></div> : 
+                                <Grid item xs={12} style={{ minHeight: "300px", height: 300 }}>
+                                    <DataGrid
+                                        rows={userFormData.vaccineHistory}
+                                        columns={vaccineHistoryColumns}
+                                        pageSize={5}
+                                        rowsPerPageOptions={[5]}
+                                        checkboxSelection
+                                        selectionModel={selectionModel}
+                                        onSelectionModelChange={(newSelectionModel) => {
+                                            setSelectionModel(newSelectionModel);
+                                        }}
+                                    />
+                                </Grid>
+                            }
                         </Grid>
                     </CardContent>
                 </Card>

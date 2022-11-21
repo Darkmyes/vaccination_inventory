@@ -30,7 +30,9 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
         setVaccineHistoryFormData({ ...vaccinehistoryFormData, [prop]: event.target.value });
     };
     const handleChangeSelect = (prop: keyof VaccineHistory) => (event: SelectChangeEvent) => {
-        setVaccineHistoryFormData({ ...vaccinehistoryFormData, [prop]: event.target.value });
+        let vaccine = vaccines.find(vaccineInArray => vaccineInArray.id === parseInt(event.target.value))
+        console.log(vaccine)
+        setVaccineHistoryFormData({ ...vaccinehistoryFormData, [prop]: event.target.value, ["vaccine"]: vaccine });
     };
 
     const [snackbarMessage, setSnackbarMessage] = React.useState<string>("");
@@ -81,9 +83,10 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
         vaccineRepo.list()
             .then((vaccines: Vaccine[]) => {
                 setVaccines(vaccines);
+                setVaccineHistoryFormData({ ...vaccinehistoryFormData, ["vaccine"]: vaccines[0] });
             })
             .catch((err: string) => {console.log(err)})
-    }, [])
+    }, [props.visibility])
 
     return (
         <div>
@@ -144,7 +147,7 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
                                     <InputLabel htmlFor="outlined-adornment-dosis-number">Dosis Number</InputLabel>
                                     <OutlinedInput
                                         id="outlined-adornment-dosis-number"
-                                        type="text"
+                                        type="number"
                                         value={vaccinehistoryFormData.dosisNumber}
                                         onChange={handleChange('dosisNumber')}
                                         startAdornment={
@@ -153,6 +156,7 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
                                             </InputAdornment>
                                         }
                                         label="Dosis Number"
+                                        inputProps={{ min: 1 }}
                                         error={validationErrors.name.length > 0}
                                     />
                                     {
