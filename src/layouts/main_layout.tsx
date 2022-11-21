@@ -94,7 +94,7 @@ const MainLayout: React.FC<any> = ({ children }) => {
                     </Box>
                 </Toolbar>
             </AppBar>
-            <Container sx={{pt: 5}}>
+            <Container sx={{pt: 6}}>
                 <Box sx={{ p: 2 }} component="main">
                     { children }
                 </Box>

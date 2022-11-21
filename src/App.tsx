@@ -8,7 +8,7 @@ import RouterComponent from './router';
 const theme = createTheme({
   palette: {
     primary: {
-      main: 'rgb(26 41 124)',
+      main: '#03a5cf',
     },
     secondary: {
       main: '#ff471b',

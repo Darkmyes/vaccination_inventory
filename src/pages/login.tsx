@@ -131,7 +131,8 @@ const LoginPage = () => {
                     <FormControl sx={{ m: 1 }}>
                         <Button
                             variant="contained"
-                            color='success'
+                            sx={{color: "white", fontWeight: "bold"}}
+                            color='primary'
                             onClick={handleLoginButton}
                         >
                             Login

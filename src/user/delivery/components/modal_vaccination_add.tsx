@@ -5,6 +5,7 @@ import { VaccineHistory } from '../../../domain/vaccine_history';
 import { Vaccine } from '../../../domain/vaccine';
 import { Category, Close, Event, Numbers } from '@mui/icons-material';
 import TopSnackbar from '../../../components/top_snackbar';
+import { UserValidator } from '../../usecase/validator';
 
 const vaccineRepo = new VaccineFakeAPIRepo();
 
@@ -15,10 +16,7 @@ interface ModalVaccinationAddProps {
 }
 
 interface ValidationErrors {
-    ci: string[];
-    name: string[];
-    lastname: string[];
-    email: string[];
+    vaccinationDate: string[];
 }
 
 const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
@@ -40,28 +38,33 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
     const [snackbarVisibility, setSnackbarVisibility] = React.useState<boolean>(false);
 
     const [validationErrors, setValidationErrors] = React.useState<ValidationErrors>({
-        ci: [],
-        name: [],
-        lastname: [],
-        email: []
+        vaccinationDate: []
     });
 
     const validateVaccineHistoryForErrors = () => {
-        /* const ciErrors = adminVaccineHistoryUC.validateCI(vaccinehistoryFormData.ci)
-        const nameErrors = adminVaccineHistoryUC.validateName(vaccinehistoryFormData.name)
-        const lastnameErrors = adminVaccineHistoryUC.validateLastname(vaccinehistoryFormData.lastname)
-        const emailErrors = adminVaccineHistoryUC.validateEmail(vaccinehistoryFormData.email) */
+        const dateErrors = UserValidator.validateDate(vaccinehistoryFormData.vaccinationDate)
 
-        /* setValidationErrors({
-            ci: ciErrors,
-            name: nameErrors,
-            lastname: lastnameErrors,
-            email: emailErrors
-        }) */
+        setValidationErrors({
+            vaccinationDate: dateErrors,
+        })
+
+        let errors: string[] = [];
+        errors = errors.concat(dateErrors);
+
+        return errors
     }
 
     const handleRegisterButton = async () => {
-        validateVaccineHistoryForErrors()
+        let validationErrorMessages = validateVaccineHistoryForErrors()
+
+        if (validationErrorMessages.length > 0) {
+            let validationError = "Error in Vaccination Dosis data:\n"
+            validationErrorMessages.forEach( errorMessage => validationError += (errorMessage + ".\n"))
+            setSnackbarMessage(validationError)
+            setSnackbarSeverity("error")
+            setSnackbarVisibility(true)
+            return
+        }
 
         try {
             let vaccinehistoryToRegister = JSON.parse(JSON.stringify(vaccinehistoryFormData)) as VaccineHistory;
@@ -116,7 +119,7 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
                                 <Close></Close>
                             </IconButton>
                         }
-                        title="Register VaccineHistory"
+                        title="Register Vaccine Dosis"
                     />
                     <Divider />
                     <CardContent className='flex column items-center'>
@@ -157,16 +160,16 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
                                         }
                                         label="Dosis Number"
                                         inputProps={{ min: 1 }}
-                                        error={validationErrors.name.length > 0}
+                                        /* error={validationErrors.name.length > 0} */
                                     />
-                                    {
+                                    {/* {
                                         validationErrors.name.length === 0 ? <div></div> :
                                         <FormHelperText error id="name-error">
                                             { validationErrors.name.reduce((error, currentError) => {
                                                 return currentError + (". " + error)
                                             }, "") }
                                         </FormHelperText>
-                                    }
+                                    } */}
                                 </FormControl>
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -174,7 +177,7 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
                                     <InputLabel htmlFor="outlined-adornment-date">Date</InputLabel>
                                     <OutlinedInput
                                         id="outlined-adornment-date"
-                                        type="text"
+                                        type="date"
                                         value={vaccinehistoryFormData.vaccinationDate}
                                         onChange={handleChange('vaccinationDate')}
                                         startAdornment={
@@ -183,44 +186,18 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
                                             </InputAdornment>
                                         }
                                         label="Date"
-                                        error={validationErrors.lastname.length > 0}
+                                        error={validationErrors.vaccinationDate.length > 0}
                                     />
                                     {
-                                        validationErrors.lastname.length === 0 ? <div></div> :
-                                        <FormHelperText error id="lastname-error">
-                                            { validationErrors.lastname.reduce((error, currentError) => {
+                                        validationErrors.vaccinationDate.length === 0 ? <div></div> :
+                                        <FormHelperText error id="vaccination-date-error">
+                                            { validationErrors.vaccinationDate.reduce((error, currentError) => {
                                                 return currentError + (". " + error)
                                             }, "") }
                                         </FormHelperText>
                                     }
                                 </FormControl>
                             </Grid>
-                            {/* <Grid item xs={12} md={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel htmlFor="outlined-adornment-name">Email</InputLabel>
-                                    <OutlinedInput
-                                        id="outlined-adornment-email"
-                                        type="text"
-                                        value={vaccinehistoryFormData.email}
-                                        onChange={handleChange('email')}
-                                        startAdornment={
-                                            <InputAdornment position="start">
-                                                <Email></Email>
-                                            </InputAdornment>
-                                        }
-                                        label="Email"
-                                        error={validationErrors.email.length > 0}
-                                    />
-                                    {
-                                        validationErrors.email.length === 0 ? <div></div> :
-                                        <FormHelperText error id="email-error">
-                                            { validationErrors.email.reduce((error, currentError) => {
-                                                return currentError + (". " + error)
-                                            }, "") }
-                                        </FormHelperText>
-                                    }
-                                </FormControl>
-                            </Grid> */}
                         </Grid>
                     </CardContent>
                     <Divider />

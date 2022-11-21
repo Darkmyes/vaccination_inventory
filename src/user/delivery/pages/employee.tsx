@@ -11,6 +11,7 @@ import { DataGrid, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
 import { VaccineHistory } from '../../../domain/vaccine_history';
 import ModalVaccinationAdd from '../components/modal_vaccination_add';
 import ModalVaccinationDelete from '../components/modal_vaccination_delete';
+import { UserValidator } from '../../usecase/validator';
 
 const userRepo = new UserFakeAPIRepo();
 const authUserUC = new AuthUserUC(userRepo);
@@ -21,6 +22,9 @@ interface ValidationErrors {
     name: string[];
     lastname: string[];
     email: string[];
+    birthDate: string[];
+    phoneNumber: string[];
+    homeAddress: string[];
 }
 
 const EmployeePage = () => {
@@ -52,8 +56,8 @@ const EmployeePage = () => {
 
     const vaccineHistoryColumns: GridColDef[] = [
         { field: 'id', headerName: 'ID', width: 70 },
-        { field: 'dosisNumber', headerName: 'Dosis Number', width: 130 },
-        { field: 'vaccine', valueParser: (row: VaccineHistory) => { return row.vaccine != null ? row.vaccine.name : "-" } , headerName: 'Vaccine', width: 130 },
+        { field: 'dosisNumber', headerName: '# Dosis', width: 70 },
+        { field: 'vaccine', valueGetter: (params) => { return params.row.vaccine != null ? params.row.vaccine.name : "-" } , headerName: 'Vaccine', width: 130 },
         { field: 'vaccinationDate', headerName: 'Date', width: 130 },
     ];
 
@@ -65,7 +69,10 @@ const EmployeePage = () => {
         ci: [],
         name: [],
         lastname: [],
-        email: []
+        email: [],
+        birthDate: [],
+        phoneNumber: [],
+        homeAddress: []
     });
 
     const [vaccinesSelected, setVaccinesSelected] = React.useState<VaccineHistory[]>([]);
@@ -87,53 +94,38 @@ const EmployeePage = () => {
     }
 
     const validateUserForErrors = () => {
-        const ciErrors = employeeUserUC.validateCI(userFormData.ci)
-        const nameErrors = employeeUserUC.validateName(userFormData.name)
-        const lastnameErrors = employeeUserUC.validateLastname(userFormData.lastname)
-        const emailErrors = employeeUserUC.validateEmail(userFormData.email)
+        const ciErrors = UserValidator.validateCI(userFormData.ci)
+        const nameErrors = UserValidator.validateName(userFormData.name)
+        const lastnameErrors = UserValidator.validateLastname(userFormData.lastname)
+        const emailErrors = UserValidator.validateEmail(userFormData.email)
+
+        const birthDateErrors = UserValidator.validateBirthDate(userFormData.birthDate)
+        const phoneNumberErrors = UserValidator.validatePhoneNumber(userFormData.phoneNumber)
+        const homeAdressErrors = UserValidator.validateHomeAddress(userFormData.homeAddress)
 
         setValidationErrors({
             ci: ciErrors,
             name: nameErrors,
             lastname: lastnameErrors,
-            email: emailErrors
+            email: emailErrors,
+
+            birthDate: birthDateErrors,
+            phoneNumber: phoneNumberErrors,
+            homeAddress: homeAdressErrors
         })
-    }
 
-    const handleUpdateButton = async () => {
-        validateUserForErrors()
+        let errors: string[] = [];
 
-        const validationErrorMessages = employeeUserUC.validateUser(userFormData)
-        if (validationErrorMessages.length > 0) {
-            let validationError = "Error in User data:\n"
-            validationErrorMessages.forEach( errorMessage => validationError += (errorMessage + ".\n"))
-            setSnackbarMessage(validationError)
-            setSnackbarSeverity("error")
-            setSnackbarVisibility(true)
-            return
-        }
+        errors = errors.concat(ciErrors);
+        errors = errors.concat(nameErrors);
+        errors = errors.concat(lastnameErrors);
+        errors = errors.concat(emailErrors);
 
-        try {
-            let userToUpdate = JSON.parse(JSON.stringify(userFormData)) as User;
+        errors = errors.concat(birthDateErrors);
+        errors = errors.concat(phoneNumberErrors);
+        errors = errors.concat(homeAdressErrors);
 
-            const newUser = await employeeUserUC.update(userToUpdate);
-            if (newUser === null) {
-                setSnackbarMessage("Failed to update: Internal Error")
-                setSnackbarSeverity("error")
-                setSnackbarVisibility(true)
-                return
-            }
-            setSnackbarMessage("User updateed succesfully")
-            setSnackbarSeverity("success")
-            setSnackbarVisibility(true)
-
-            setUserFormData(new User("", "", "", "", defaultRoleId))
-        } catch ( error ) {
-            console.log(error)
-            setSnackbarMessage("Failed to update: Internal Error")
-            setSnackbarSeverity("error")
-            setSnackbarVisibility(true)
-        }
+        return  errors
     }
 
     const handleAddVaccineHistory = (vaccineHistory: VaccineHistory) => {
@@ -160,9 +152,7 @@ const EmployeePage = () => {
     }
 
     const handleSaveButton = async () => {
-        validateUserForErrors()
-
-        const validationErrorMessages = employeeUserUC.validateUser(userFormData)
+        const validationErrorMessages = validateUserForErrors()
         if (validationErrorMessages.length > 0) {
             let validationError = "Error in User data:\n"
             validationErrorMessages.forEach( errorMessage => validationError += (errorMessage + ".\n"))
@@ -359,7 +349,7 @@ const EmployeePage = () => {
                                     <InputLabel htmlFor="outlined-adornment-birthdate">Birth Date</InputLabel>
                                     <OutlinedInput
                                         id="outlined-adornment-birthdate"
-                                        type="text"
+                                        type="date"
                                         value={userFormData.birthDate}
                                         onChange={handleChange('birthDate')}
                                         startAdornment={
@@ -368,12 +358,12 @@ const EmployeePage = () => {
                                             </InputAdornment>
                                         }
                                         label="Birth Date"
-                                        error={validationErrors.lastname.length > 0}
+                                        error={validationErrors.birthDate.length > 0}
                                     />
                                     {
-                                        validationErrors.lastname.length === 0 ? <div></div> :
-                                        <FormHelperText error id="lastname-error">
-                                            { validationErrors.lastname.reduce((error, currentError) => {
+                                        validationErrors.birthDate.length === 0 ? <div></div> :
+                                        <FormHelperText error id="birth-date-error">
+                                            { validationErrors.birthDate.reduce((error, currentError) => {
                                                 return currentError + (". " + error)
                                             }, "") }
                                         </FormHelperText>
@@ -395,12 +385,12 @@ const EmployeePage = () => {
                                         }
                                         label="Phone Number"
                                         inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 10 }}
-                                        error={validationErrors.lastname.length > 0}
+                                        error={validationErrors.phoneNumber.length > 0}
                                     />
                                     {
-                                        validationErrors.lastname.length === 0 ? <div></div> :
-                                        <FormHelperText error id="lastname-error">
-                                            { validationErrors.lastname.reduce((error, currentError) => {
+                                        validationErrors.phoneNumber.length === 0 ? <div></div> :
+                                        <FormHelperText error id="phone-number-error">
+                                            { validationErrors.phoneNumber.reduce((error, currentError) => {
                                                 return currentError + (". " + error)
                                             }, "") }
                                         </FormHelperText>
@@ -421,12 +411,12 @@ const EmployeePage = () => {
                                             </InputAdornment>
                                         }
                                         label="Home Address"
-                                        error={validationErrors.lastname.length > 0}
+                                        error={validationErrors.homeAddress.length > 0}
                                     />
                                     {
-                                        validationErrors.lastname.length === 0 ? <div></div> :
-                                        <FormHelperText error id="lastname-error">
-                                            { validationErrors.lastname.reduce((error, currentError) => {
+                                        validationErrors.homeAddress.length === 0 ? <div></div> :
+                                        <FormHelperText error id="home-address-error">
+                                            { validationErrors.homeAddress.reduce((error, currentError) => {
                                                 return currentError + (". " + error)
                                             }, "") }
                                         </FormHelperText>
@@ -447,8 +437,9 @@ const EmployeePage = () => {
                                 </FormControl>
                             </Grid>
 
-                            <Grid item xs={12}>
-                                <div className='flex items-center justify-end'>
+                            <Grid item xs={12} className="flex justify-between items-center no-wrap">
+                                <h2>Vaccination History</h2>
+                                <div className='flex items-center justify-end wrap'>
                                     <Button
                                         sx={{ m: 1 }}
                                         variant="contained"
