@@ -77,7 +77,7 @@ export interface AdminUserUsecase {
     delete(id: number) : Promise<boolean>;
 
     generateCredentials (user: User) : { username: string, password: string };
-    validateUser (user: User) : boolean;
+    validateUser (user: User) : string[];
 }
 
 export interface EmployeeUserUsecase {

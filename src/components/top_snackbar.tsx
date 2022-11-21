@@ -5,7 +5,7 @@ function TransitionDown(props: any) {
     return <Slide {...props} direction="down" />;
 }
 
-interface TopSnackbarProps {
+export interface TopSnackbarProps {
     message: string;
     severity: AlertColor | undefined;
     visibility: boolean;

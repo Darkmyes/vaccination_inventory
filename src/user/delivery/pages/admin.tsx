@@ -14,38 +14,7 @@ import ModalAdd from '../components/modal_add';
 const userRepo = new UserFakeAPIRepo();
 const adminUserUC = new AdminUserUC(userRepo);
 
-interface AdminState {
-    username: string,
-    password: string,
-    showPassword: boolean
-}
-
-function TransitionDown(props: any) {
-    return <Slide {...props} direction="down" />;
-}
-
 const AdminPage = () => {
-    const navigate = useNavigate()
-
-    const [values, setValues] = React.useState<AdminState>({
-        username: "",
-        password: "",
-        showPassword: false
-    });
-    const handleChange = (prop: keyof AdminState) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        setValues({ ...values, [prop]: event.target.value });
-    };
-
-    const handleClickShowPassword = () => {
-        setValues({
-            ...values,
-            showPassword: !values.showPassword,
-        });
-    };
-    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-    };
-
     const [snackbarVisibility, setSnackbarVisibility] = React.useState<boolean>(false);
     const handleCloseSnackbar = () => {
         setSnackbarVisibility(false);
@@ -94,7 +63,7 @@ const AdminPage = () => {
                         variant="contained"
                         color='success'
                         onClick={() => setAddModalVisibility(true)}
-                        startIcon={<Edit />}
+                        startIcon={<Add />}
                     >
                         Add
                     </Button>
@@ -103,7 +72,7 @@ const AdminPage = () => {
                         size="small"
                         variant="contained"
                         color='warning'
-                        startIcon={<Add />}
+                        startIcon={<Edit />}
                     >
                         Edit
                     </Button>
