@@ -4,6 +4,12 @@ export class RolFakeAPIRepo implements RolRepository {
 
     private defaultRoles: string = '[{"id": 1, "name": "Administrator"}, {"id": 2, "name": "Employee"}]'
 
+    constructor () {
+        if (localStorage.getItem("roles") == null) {
+            localStorage.setItem("roles", this.defaultRoles)
+        }
+    }
+
     async list() : Promise<Rol[]> {        
         let roles: Rol[] = JSON.parse(localStorage.getItem("roles") || this.defaultRoles) as Rol[];        
         return roles;

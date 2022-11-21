@@ -4,6 +4,12 @@ export class VaccineFakeAPIRepo implements VaccineRepository {
 
     private defaultVaccines: string = '[{"id": 1, "name": "Sputnik"}, {"id": 2, "name": "AstraZeneca"}, {"id": 3, "name": "Pfizer"}, {"id": 4, "name": "Jhonson&Jhonson"}]'
 
+    constructor () {
+        if (localStorage.getItem("vaccines") == null) {
+            localStorage.setItem("vaccines", this.defaultVaccines)
+        }
+    }
+
     async list() : Promise<Vaccine[]> {        
         let vaccinees: Vaccine[] = JSON.parse(localStorage.getItem("vaccines") || this.defaultVaccines) as Vaccine[];        
         return vaccinees;

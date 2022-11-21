@@ -2,25 +2,13 @@ import { User, UserRepository } from "../../domain/user";
 
 export class UserFakeAPIRepo implements UserRepository {
 
-    private defaultUsers: string = `[
-        {
-            "id": 1,
-            "ci": "0000000000",
-            "name" : "admin",
-            "lastname" : "root",
-            "email" : "admin@sis.com",
-            "rolId" : 1,
+    private defaultUsers: string = `[{"id":1,"ci":"0000000000","name":"admin wer","lastname":"root ser","email":"admin@sis.com","rolId":1,"username":"admin","password":"root","birthDate":"1999/01/01","homeAddress":"Streeet 1 and Street 2","phoneNumber":"0000000000","vaccineState":false,"vaccineHistory":[]},{"id":2,"ci":"1111111111","name":"Jhon","lastname":"Doe","email":"jhon.doe@gmail.com","rolId":2,"username":"jhdoe.1111","password":"MTY2OTA2NTA3NTU3Nw==","birthDate":"1999-03-29","homeAddress":"Primary Street & Secondary Street","phoneNumber":"1111111111","vaccineState":true,"vaccineHistory":[{"id":1,"vaccineId":1,"vaccine":{"id":1,"name":"Sputnik"},"dosisNumber":1,"vaccinationDate":"2021-11-21"},{"id":2,"vaccineId":2,"vaccine":{"id":2,"name":"AstraZeneca"},"dosisNumber":"2","vaccinationDate":"2022-02-21"}]}]`
 
-            "username": "admin",
-            "password": "root",
-
-            "birthDate": "1999/01/01",
-            "homeAddress": "Streeet 1 and Street 2",
-            "phoneNumber": "0000000000",
-            "vaccineState": false,
-            "vaccineHistory": []
+    constructor () {
+        if (localStorage.getItem("users") == null) {
+            localStorage.setItem("users", this.defaultUsers)
         }
-    ]`
+    }
 
     async list() : Promise<User[]> {        
         let users: User[] = JSON.parse(localStorage.getItem("users") || this.defaultUsers) as User[];        

@@ -1,3 +1,17 @@
+# Vaccination Inventory System
+
+System in charge of keeping track of vaccination of registered employees or to be registered in a company.
+
+## Technical Data
+
+This system allows you to track the inventory of the vaccination status of employees.\
+For efficient use, the application will have 2 roles:\
+\
+Administrator.\
+\
+Employee.
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
