@@ -1,3 +1,5 @@
+![logo192](https://user-images.githubusercontent.com/30057827/203169531-fce4bfa6-078f-4af3-9c2f-7b98078ba690.png)
+
 # Vaccination Inventory System
 
 Demo of a Frontend Proyect emulating a system in charge of keeping track of vaccination of registered or to be registered employees in a company.
@@ -9,6 +11,9 @@ There are 2 roles Administrator and Employeee, the default user is:
 username: admin
 password: root
 ```
+## Live Demo
+
+[Go to Site](https://darkmyes.github.io/vaccination_inventory_demo)
 
 ## Technical Data
 
