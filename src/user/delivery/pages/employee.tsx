@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Button, OutlinedInput, InputAdornment, Card, IconButton, CardContent, InputLabel, FormControl, AlertColor, CardHeader, Divider, SelectChangeEvent, Grid, FormHelperText, FormControlLabel, Checkbox } from "@mui/material";
+import { Button, OutlinedInput, InputAdornment, Card, IconButton, CardContent, InputLabel, FormControl, AlertColor, CardHeader, Divider, Grid, FormHelperText, FormControlLabel, Checkbox } from "@mui/material";
 import { UserFakeAPIRepo } from '../../repository/fake_api';
 import { EmployeeUserUC } from '../../usecase/employee_usecase';
 import { AuthUserUC } from '../../usecase/auth_usecase';
 import { User } from '../../../domain/user';
-import { Badge, Email, LocationCityRounded, Phone, Save, Event, TextFields, Delete, Edit, Add } from '@mui/icons-material';
+import { Badge, Email, LocationCityRounded, Phone, Save, Event, TextFields, Delete, Add } from '@mui/icons-material';
 import TopSnackbar from '../../../components/top_snackbar';
 import MainLayout from '../../../layouts/main_layout';
 import { DataGrid, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
@@ -29,7 +29,6 @@ interface ValidationErrors {
 
 const EmployeePage = () => {
     const [addModalVisibility, setAddModalVisibility] = React.useState<boolean>(false);
-    const [editModalVisibility, setEditModalVisibility] = React.useState<boolean>(false);
     const [deleteModalVisibility, setDeleteModalVisibility] = React.useState<boolean>(false);
 
     const defaultRoleId = 2;
@@ -77,13 +76,6 @@ const EmployeePage = () => {
 
     const [vaccinesSelected, setVaccinesSelected] = React.useState<VaccineHistory[]>([]);
     const [selectionModel, setSelectionModel] = React.useState<GridSelectionModel>([]);
-
-    const openEditModal = () => {
-        let vaccineSelected = vaccinesSelected.find( vaccineInArray => vaccineInArray.id === selectionModel[0] )        
-        setVaccinesSelected(JSON.parse(JSON.stringify(vaccinesSelected)))
-
-        setEditModalVisibility(true)
-    }
 
     const openDeleteModal = () => {
         let usersSelectedInTable = vaccinesSelected.filter( vaccineInArray => selectionModel.includes(vaccineInArray.id) )
@@ -138,13 +130,13 @@ const EmployeePage = () => {
 
         let vaccineHistoryArray = JSON.parse(JSON.stringify(userFormData.vaccineHistory))
         vaccineHistoryArray.push(vaccineHistory)
-        setUserFormData({ ...userFormData, ["vaccineHistory"]: vaccineHistoryArray });
+        setUserFormData({ ...userFormData, vaccineHistory: vaccineHistoryArray });
     }
 
     const handleDeleteVaccineHistory = () => {
         let vaccineHistoryArray = JSON.parse(JSON.stringify(userFormData.vaccineHistory))
         vaccineHistoryArray = vaccineHistoryArray.filter((vaccine: VaccineHistory) => !selectionModel.includes(vaccine.id))
-        setUserFormData({ ...userFormData, ["vaccineHistory"]: vaccineHistoryArray });
+        setUserFormData({ ...userFormData, vaccineHistory: vaccineHistoryArray });
         setSelectionModel([]);
     }
 

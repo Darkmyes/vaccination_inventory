@@ -150,13 +150,6 @@ const AdminPage = () => {
         setDeleteModalVisibility(true)
     }
 
-    const filterByDate = () => {
-        let usersSelectedInTable = users.filter( userInArray => selectionModel.includes(userInArray.id) )
-        setUsersSelected(JSON.parse(JSON.stringify(usersSelectedInTable)))
-
-        setDeleteModalVisibility(true)
-    }
-
     /* const getAdmins = async() => {
         const users = await adminUserUC.listAdmins();
         setUsers(users);

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Button, Card, IconButton, CardContent, AlertColor, Modal, CardActions, CardHeader, Divider, Grid } from "@mui/material";
+import { Button, Card, IconButton, CardContent, Modal, CardActions, CardHeader, Divider, Grid } from "@mui/material";
 import { VaccineHistory } from '../../../domain/vaccine_history';
 import { Close } from '@mui/icons-material';
 interface ModalVaccinationDeleteProps {

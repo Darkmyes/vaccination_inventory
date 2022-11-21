@@ -29,7 +29,7 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
     };
     const handleChangeSelect = (prop: keyof VaccineHistory) => (event: SelectChangeEvent) => {
         let vaccine = vaccines.find(vaccineInArray => vaccineInArray.id === parseInt(event.target.value))
-        setVaccineHistoryFormData({ ...vaccinehistoryFormData, [prop]: event.target.value, ["vaccine"]: vaccine });
+        setVaccineHistoryFormData({ ...vaccinehistoryFormData, [prop]: event.target.value, vaccine: vaccine });
     };
 
     const [snackbarMessage, setSnackbarMessage] = React.useState<string>("");
@@ -85,7 +85,7 @@ const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
         vaccineRepo.list()
             .then((vaccines: Vaccine[]) => {
                 setVaccines(vaccines);
-                setVaccineHistoryFormData({ ...vaccinehistoryFormData, ["vaccine"]: vaccines[0] });
+                setVaccineHistoryFormData({ ...vaccinehistoryFormData, vaccine: vaccines[0] });
             })
             .catch((err: string) => {console.log(err)})
     }, [props.visibility])
