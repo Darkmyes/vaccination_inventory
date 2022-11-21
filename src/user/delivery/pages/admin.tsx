@@ -1,25 +1,19 @@
 import * as React from 'react';
-import { Button, OutlinedInput, InputAdornment, IconButton, Card, CardContent, InputLabel, FormControl, Snackbar, Slide, Alert, Modal, CircularProgress } from "@mui/material";
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
-import { useNavigate } from 'react-router-dom';
+import { Button } from "@mui/material";
+import { DataGrid, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
 
 import MainLayout from '../../../layouts/main_layout';
-import { Person, Lock, Delete, Edit, Add } from '@mui/icons-material';
+import { Delete, Edit, Add } from '@mui/icons-material';
 import { UserFakeAPIRepo } from '../../repository/fake_api';
 import { AdminUserUC } from '../../usecase/admin_usecase';
-import { Box } from '@mui/system';
 import { User } from '../../../domain/user';
 import ModalAdd from '../components/modal_add';
+import ModalDelete from '../components/modal_delete';
 
 const userRepo = new UserFakeAPIRepo();
 const adminUserUC = new AdminUserUC(userRepo);
 
 const AdminPage = () => {
-    const [snackbarVisibility, setSnackbarVisibility] = React.useState<boolean>(false);
-    const handleCloseSnackbar = () => {
-        setSnackbarVisibility(false);
-    };
-
     const [addModalVisibility, setAddModalVisibility] = React.useState<boolean>(false);
     const [editModalVisibility, setEditModalVisibility] = React.useState<boolean>(false);
     const [deleteModalVisibility, setDeleteModalVisibility] = React.useState<boolean>(false);
@@ -31,14 +25,32 @@ const AdminPage = () => {
         { field: 'email', headerName: 'Email', width: 130 },
         { field: 'username', headerName: 'Username', width: 130 },
     ];
-    const [users, setUsers] = React.useState<User[]>([]);
 
+    const [users, setUsers] = React.useState<User[]>([]);
     const getUsers = async() => {
         const users = await adminUserUC.list();
         setUsers(users);
     }
 
-    const getAdmins = async() => {
+    const [userSelected, setUserSelected] = React.useState<User | null>(null);
+    const [usersSelected, setUsersSelected] = React.useState<User[]>([]);
+    const [selectionModel, setSelectionModel] = React.useState<GridSelectionModel>([]);
+
+    const openEditModal = () => {
+        let usersSelected = users.find( userInArray => selectionModel.includes(userInArray.id) )        
+        setUsersSelected(JSON.parse(JSON.stringify(usersSelected)))
+
+        setEditModalVisibility(true)
+    }
+
+    const openDeleteModal = () => {
+        let userSelected = users.find( userInArray => userInArray.id === selectionModel[0] )        
+        setUserSelected(JSON.parse(JSON.stringify(userSelected)))
+
+        setDeleteModalVisibility(true)
+    }
+
+    /* const getAdmins = async() => {
         const users = await adminUserUC.listAdmins();
         setUsers(users);
     }
@@ -46,7 +58,7 @@ const AdminPage = () => {
     const getEmployees = async() => {
         const users = await adminUserUC.listEmployees();
         setUsers(users);
-    }
+    } */
 
     React.useEffect( () => {
         getUsers();
@@ -54,12 +66,38 @@ const AdminPage = () => {
 
     return (
         <MainLayout>
+
+            <ModalAdd
+                visibility={addModalVisibility}
+                handleVisibility={setAddModalVisibility}
+                handleFinishAction={getUsers}
+            ></ModalAdd>
+
+            {/* {
+                selectionModel.length !== 1 ? <div></div> : 
+                <ModalEdit
+                    visibility={editModalVisibility}
+                    handleVisibility={setEditModalVisibility}
+                    handleFinishAction={getUsers}
+                    user={userSelected}
+                ></ModalEdit>
+            } */}
+
+            {
+                userSelected === null ? <div></div> : 
+                <ModalDelete
+                    visibility={deleteModalVisibility}
+                    handleVisibility={setDeleteModalVisibility}
+                    handleFinishAction={getUsers}
+                    users={usersSelected}
+                ></ModalDelete>
+            }
+
             <div className='flex items-center justify-between'>
                 <h1>Users</h1>
                 <div className='flex items-center justify-between'>
                     <Button
                         sx={{ m: 1 }}
-                        size="small"
                         variant="contained"
                         color='success'
                         onClick={() => setAddModalVisibility(true)}
@@ -69,18 +107,18 @@ const AdminPage = () => {
                     </Button>
                     <Button
                         sx={{ m: 1 }}
-                        size="small"
                         variant="contained"
                         color='warning'
+                        onClick={() => setEditModalVisibility(true)}
                         startIcon={<Edit />}
                     >
                         Edit
                     </Button>
                     <Button
                         sx={{ m: 1 }}
-                        size="small"
                         variant="contained"
                         color='error'
+                        onClick={openDeleteModal}
                         startIcon={<Delete />}
                     >
                         Delete
@@ -94,13 +132,12 @@ const AdminPage = () => {
                     pageSize={5}
                     rowsPerPageOptions={[5]}
                     checkboxSelection
+                    selectionModel={selectionModel}
+                    onSelectionModelChange={(newSelectionModel) => {
+                        setSelectionModel(newSelectionModel);
+                    }}
                 />
             </div>
-
-            <ModalAdd
-                visibility={addModalVisibility}
-                handleVisibility={setAddModalVisibility}
-            ></ModalAdd>
         </MainLayout>
     )
 }

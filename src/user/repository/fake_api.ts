@@ -52,7 +52,7 @@ export class UserFakeAPIRepo implements UserRepository {
         let users: User[] = JSON.parse(localStorage.getItem("users") || this.defaultUsers) as User[];
         
         let user = users.find( (user: User) => user.username === username && user.password === password) as User;
-        if (user != null) {
+        if (user !== null) {
             return user;
         }
         return null
@@ -91,9 +91,8 @@ export class UserFakeAPIRepo implements UserRepository {
     
     async delete(id: number) : Promise<boolean> {
         let users: User[] = JSON.parse(localStorage.getItem("users") || this.defaultUsers) as User[];
-        users.filter( user => user.id !== id );
 
-        localStorage.setItem("users", JSON.stringify(users));
+        localStorage.setItem("users", JSON.stringify(users.filter( user => user.id !== id )));
         return true
     }
 

@@ -1,21 +1,29 @@
 import * as React from 'react';
-import { Button, OutlinedInput, InputAdornment, Card, IconButton, CardContent, InputLabel, FormControl, Snackbar, Slide, Alert, Modal, CircularProgress, CardActions, Typography, CardHeader, Divider, Select, MenuItem, SelectChangeEvent, Grid, AlertColor, FormHelperText } from "@mui/material";
+import { Button, OutlinedInput, InputAdornment, Card, IconButton, CardContent, InputLabel, FormControl, AlertColor, Modal, CardActions, CardHeader, Divider, Select, MenuItem, SelectChangeEvent, Grid, FormHelperText } from "@mui/material";
 import { RolFakeAPIRepo } from '../../../rol/repository/fake_api';
 import { UserFakeAPIRepo } from '../../repository/fake_api';
 import { AdminUserUC } from '../../usecase/admin_usecase';
 import { User } from '../../../domain/user';
 import { Rol } from '../../../domain/rol';
 import { Badge, Close, Email, SupervisedUserCircle, TextFields } from '@mui/icons-material';
-import { minWidth } from '@mui/system';
-import TopSnackbar, { TopSnackbarProps } from '../../../components/top_snackbar';
+import TopSnackbar from '../../../components/top_snackbar';
 
 const rolRepo = new RolFakeAPIRepo();
 
 const userRepo = new UserFakeAPIRepo();
 const adminUserUC = new AdminUserUC(userRepo);
+
 interface ModalAddProps {
     visibility: boolean;
     handleVisibility: Function;
+    handleFinishAction: Function;
+}
+
+interface ValidationErrors {
+    ci: string[];
+    name: string[];
+    lastname: string[];
+    email: string[];
 }
 
 const ModalAdd : React.FC<ModalAddProps> = (props) => {
@@ -24,35 +32,75 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
         new User("", "", "", "", defaultRoleId)
     );
     const handleChange = (prop: keyof User) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (prop === 'ci' && !(/^[0-9]+$/).test(event.target.value) && event.target.value !== "") {
+            setUserFormData({ ...userFormData });
+            return
+        }
+
         setUserFormData({ ...userFormData, [prop]: event.target.value });
     };
-
     const handleChangeSelect = (prop: keyof User) => (event: SelectChangeEvent) => {
         setUserFormData({ ...userFormData, [prop]: event.target.value });
     };
 
     const [snackbarMessage, setSnackbarMessage] = React.useState<string>("");
+    const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertColor>("error");
     const [snackbarVisibility, setSnackbarVisibility] = React.useState<boolean>(false);
 
-    const handleRegisterButton = () => {
+    const [validationErrors, setValidationErrors] = React.useState<ValidationErrors>({
+        ci: [],
+        name: [],
+        lastname: [],
+        email: []
+    });
+
+    const validateUserForErrors = () => {
+        const ciErrors = adminUserUC.validateCI(userFormData.ci)
+        const nameErrors = adminUserUC.validateName(userFormData.name)
+        const lastnameErrors = adminUserUC.validateLastname(userFormData.lastname)
+        const emailErrors = adminUserUC.validateEmail(userFormData.email)
+
+        setValidationErrors({
+            ci: ciErrors,
+            name: nameErrors,
+            lastname: lastnameErrors,
+            email: emailErrors
+        })
+    }
+
+    const handleRegisterButton = async () => {
+        validateUserForErrors()
+
         const validationErrorMessages = adminUserUC.validateUser(userFormData)
         if (validationErrorMessages.length > 0) {
             let validationError = "Error in User data:\n"
             validationErrorMessages.forEach( errorMessage => validationError += (errorMessage + ".\n"))
             setSnackbarMessage(validationError)
+            setSnackbarSeverity("error")
             setSnackbarVisibility(true)
             return
         }
 
         try {
-            const newUser = adminUserUC.register(userFormData);
+            const newUser = await adminUserUC.register(JSON.parse(JSON.stringify(userFormData)));
             if (newUser === null) {
-                console.log("error")
-                // notificar por snackbar
+                setSnackbarMessage("Failed to register: Internal Error")
+                setSnackbarSeverity("error")
+                setSnackbarVisibility(true)
+                return
             }
+            setSnackbarMessage("User registered succesfully")
+            setSnackbarSeverity("success")
+            setSnackbarVisibility(true)
+
+            setUserFormData(new User("", "", "", "", defaultRoleId))
+            props.handleVisibility(false)
+            props.handleFinishAction()
         } catch ( error ) {
             console.log(error)
-            // notificar por snackbar
+            setSnackbarMessage("Failed to register: Internal Error")
+            setSnackbarSeverity("error")
+            setSnackbarVisibility(true)
         }
     }
 
@@ -71,7 +119,7 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
             <TopSnackbar
                 message={snackbarMessage}
                 visibility={snackbarVisibility}
-                severity="error"
+                severity={snackbarSeverity}
                 handleVisibility={setSnackbarVisibility}
             />
 
@@ -104,7 +152,7 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
                                     <InputLabel htmlFor="outlined-adornment-ci">CI</InputLabel>
                                     <OutlinedInput
                                         id="outlined-adornment-ci"
-                                        type="number"
+                                        type="text"
                                         value={userFormData.ci}
                                         onChange={handleChange('ci')}
                                         startAdornment={
@@ -113,11 +161,17 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
                                             </InputAdornment>
                                         }
                                         label="CI"
-                                        error
+                                        inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 10 }}
+                                        error={validationErrors.ci.length > 0}
                                     />
-                                    <FormHelperText error id="ci-error">
-                                        Error here
-                                    </FormHelperText>
+                                    {
+                                        validationErrors.ci.length === 0 ? <div></div> :
+                                        <FormHelperText error id="ci-error">
+                                            { validationErrors.ci.reduce((error, currentError) => {
+                                                return currentError + (". " + error)
+                                            }, "") }
+                                        </FormHelperText>
+                                    }
                                 </FormControl>
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -155,7 +209,16 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
                                             </InputAdornment>
                                         }
                                         label="Name"
+                                        error={validationErrors.name.length > 0}
                                     />
+                                    {
+                                        validationErrors.name.length === 0 ? <div></div> :
+                                        <FormHelperText error id="name-error">
+                                            { validationErrors.name.reduce((error, currentError) => {
+                                                return currentError + (". " + error)
+                                            }, "") }
+                                        </FormHelperText>
+                                    }
                                 </FormControl>
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -172,7 +235,16 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
                                             </InputAdornment>
                                         }
                                         label="Last Name"
+                                        error={validationErrors.lastname.length > 0}
                                     />
+                                    {
+                                        validationErrors.lastname.length === 0 ? <div></div> :
+                                        <FormHelperText error id="lastname-error">
+                                            { validationErrors.lastname.reduce((error, currentError) => {
+                                                return currentError + (". " + error)
+                                            }, "") }
+                                        </FormHelperText>
+                                    }
                                 </FormControl>
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -189,7 +261,16 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
                                             </InputAdornment>
                                         }
                                         label="Email"
+                                        error={validationErrors.email.length > 0}
                                     />
+                                    {
+                                        validationErrors.email.length === 0 ? <div></div> :
+                                        <FormHelperText error id="email-error">
+                                            { validationErrors.email.reduce((error, currentError) => {
+                                                return currentError + (". " + error)
+                                            }, "") }
+                                        </FormHelperText>
+                                    }
                                 </FormControl>
                             </Grid>
                         </Grid>
@@ -198,14 +279,12 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
                     <CardActions className='justify-end'>
                         <Button
                             color='error'
-                            size="small"
                             onClick={() => props.handleVisibility(false) }
                         >
                             Cancel
                         </Button>
                         <Button
                             variant="contained"
-                            size="small"
                             color='success'
                             onClick={handleRegisterButton}
                         >
