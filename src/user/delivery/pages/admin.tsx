@@ -37,15 +37,16 @@ const AdminPage = () => {
     const [selectionModel, setSelectionModel] = React.useState<GridSelectionModel>([]);
 
     const openEditModal = () => {
-        let usersSelected = users.find( userInArray => selectionModel.includes(userInArray.id) )        
-        setUsersSelected(JSON.parse(JSON.stringify(usersSelected)))
+        let userSelected = users.find( userInArray => userInArray.id === selectionModel[0] )        
+        setUserSelected(JSON.parse(JSON.stringify(userSelected)))
 
         setEditModalVisibility(true)
     }
 
     const openDeleteModal = () => {
-        let userSelected = users.find( userInArray => userInArray.id === selectionModel[0] )        
-        setUserSelected(JSON.parse(JSON.stringify(userSelected)))
+        let usersSelectedInTable = users.filter( userInArray => selectionModel.includes(userInArray.id) )
+        console.log(usersSelectedInTable)
+        setUsersSelected(JSON.parse(JSON.stringify(usersSelectedInTable)))
 
         setDeleteModalVisibility(true)
     }
@@ -84,7 +85,7 @@ const AdminPage = () => {
             } */}
 
             {
-                userSelected === null ? <div></div> : 
+                usersSelected.length === 0 ? <div></div> : 
                 <ModalDelete
                     visibility={deleteModalVisibility}
                     handleVisibility={setDeleteModalVisibility}
@@ -111,6 +112,7 @@ const AdminPage = () => {
                         color='warning'
                         onClick={() => setEditModalVisibility(true)}
                         startIcon={<Edit />}
+                        disable={selectionModel.length ====mango}
                     >
                         Edit
                     </Button>

@@ -1,14 +1,10 @@
 import * as React from 'react';
 import { Button, Card, IconButton, CardContent, AlertColor, Modal, CardActions, CardHeader, Divider, Grid } from "@mui/material";
-import { RolFakeAPIRepo } from '../../../rol/repository/fake_api';
 import { UserFakeAPIRepo } from '../../repository/fake_api';
 import { AdminUserUC } from '../../usecase/admin_usecase';
 import { User } from '../../../domain/user';
-import { Rol } from '../../../domain/rol';
 import { Close } from '@mui/icons-material';
 import TopSnackbar from '../../../components/top_snackbar';
-
-const rolRepo = new RolFakeAPIRepo();
 
 const userRepo = new UserFakeAPIRepo();
 const adminUserUC = new AdminUserUC(userRepo);
@@ -21,8 +17,6 @@ interface ModalDeleteProps {
 }
 
 const ModalDelete : React.FC<ModalDeleteProps> = (props) => {
-    const defaultRoleId = 2;
-
     const [snackbarMessage, setSnackbarMessage] = React.useState<string>("");
     const [snackbarSeverity, setSnackbarSeverity] = React.useState<AlertColor>("error");
     const [snackbarVisibility, setSnackbarVisibility] = React.useState<boolean>(false);
@@ -52,16 +46,6 @@ const ModalDelete : React.FC<ModalDeleteProps> = (props) => {
             setSnackbarVisibility(true)
         }
     }
-
-    const [roles, setRoles] = React.useState<Rol[]>([]);
-
-    React.useEffect(() => {
-        rolRepo.list()
-            .then((roles) => {
-                setRoles(roles);
-            })
-            .catch(err => console.log(err))
-    }, [])
 
     return (
         <div>
@@ -97,10 +81,10 @@ const ModalDelete : React.FC<ModalDeleteProps> = (props) => {
                     <CardContent className='flex column items-center'>
                         <Grid container spacing={2}>
                             <Grid item xs={12} className="text-center">
-                                Are you sure of deleting the folowing Users?
+                                Are you sure of deleting the folowing Users?<br></br>
                                 {
-                                    props.users.map( user => <div>
-                                        <br></br><br></br>
+                                    props.users === null ? <div></div>:
+                                    props.users.map( user => <div key={user.id}>
                                         <b>Nombre:</b> { user.name } { user.lastname } <br></br>
                                         <b>CI:</b> { user.ci }
                                     </div>)
