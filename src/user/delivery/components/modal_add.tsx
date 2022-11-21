@@ -82,7 +82,12 @@ const ModalAdd : React.FC<ModalAddProps> = (props) => {
         }
 
         try {
-            const newUser = await adminUserUC.register(JSON.parse(JSON.stringify(userFormData)));
+            let userToRegister = JSON.parse(JSON.stringify(userFormData)) as User;
+            const credentials = adminUserUC.generateCredentials(userToRegister);
+            userToRegister.username = credentials.username;
+            userToRegister.password = credentials.password;
+
+            const newUser = await adminUserUC.register(userToRegister);
             if (newUser === null) {
                 setSnackbarMessage("Failed to register: Internal Error")
                 setSnackbarSeverity("error")

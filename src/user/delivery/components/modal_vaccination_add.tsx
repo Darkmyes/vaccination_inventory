@@ -1,23 +1,17 @@
 import * as React from 'react';
 import { Button, OutlinedInput, InputAdornment, Card, IconButton, CardContent, InputLabel, FormControl, AlertColor, Modal, CardActions, CardHeader, Divider, Select, MenuItem, SelectChangeEvent, Grid, FormHelperText } from "@mui/material";
-import { RolFakeAPIRepo } from '../../../rol/repository/fake_api';
-import { UserFakeAPIRepo } from '../../repository/fake_api';
-import { AdminUserUC } from '../../usecase/admin_usecase';
-import { User } from '../../../domain/user';
-import { Rol } from '../../../domain/rol';
-import { Badge, Close, Email, SupervisedUserCircle, TextFields } from '@mui/icons-material';
+import { VaccineFakeAPIRepo } from '../../../vaccine/repository/fake_api';
+import { VaccineHistory } from '../../../domain/vaccine_history';
+import { Vaccine } from '../../../domain/vaccine';
+import { Category, Close, Event, Numbers } from '@mui/icons-material';
 import TopSnackbar from '../../../components/top_snackbar';
 
-const rolRepo = new RolFakeAPIRepo();
+const vaccineRepo = new VaccineFakeAPIRepo();
 
-const userRepo = new UserFakeAPIRepo();
-const adminUserUC = new AdminUserUC(userRepo);
-
-interface ModalEditProps {
+interface ModalVaccinationAddProps {
     visibility: boolean;
     handleVisibility: Function;
     handleFinishAction: Function;
-    user: User;
 }
 
 interface ValidationErrors {
@@ -27,21 +21,16 @@ interface ValidationErrors {
     email: string[];
 }
 
-const ModalEdit : React.FC<ModalEditProps> = (props) => {
-    const defaultRoleId = 2;
-    const [userFormData, setUserFormData] = React.useState<User>(
-        new User("", "", "", "", defaultRoleId)
+const ModalVaccinationAdd : React.FC<ModalVaccinationAddProps> = (props) => {
+    const defaultVaccineeId = 1;
+    const [vaccinehistoryFormData, setVaccineHistoryFormData] = React.useState<VaccineHistory>(
+        new VaccineHistory(defaultVaccineeId, 1, "")
     );
-    const handleChange = (prop: keyof User) => (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (prop === 'ci' && !(/^[0-9]+$/).test(event.target.value) && event.target.value !== "") {
-            setUserFormData({ ...userFormData });
-            return
-        }
-
-        setUserFormData({ ...userFormData, [prop]: event.target.value });
+    const handleChange = (prop: keyof VaccineHistory) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        setVaccineHistoryFormData({ ...vaccinehistoryFormData, [prop]: event.target.value });
     };
-    const handleChangeSelect = (prop: keyof User) => (event: SelectChangeEvent) => {
-        setUserFormData({ ...userFormData, [prop]: event.target.value });
+    const handleChangeSelect = (prop: keyof VaccineHistory) => (event: SelectChangeEvent) => {
+        setVaccineHistoryFormData({ ...vaccinehistoryFormData, [prop]: event.target.value });
     };
 
     const [snackbarMessage, setSnackbarMessage] = React.useState<string>("");
@@ -55,67 +44,46 @@ const ModalEdit : React.FC<ModalEditProps> = (props) => {
         email: []
     });
 
-    const validateUserForErrors = () => {
-        const ciErrors = adminUserUC.validateCI(userFormData.ci)
-        const nameErrors = adminUserUC.validateName(userFormData.name)
-        const lastnameErrors = adminUserUC.validateLastname(userFormData.lastname)
-        const emailErrors = adminUserUC.validateEmail(userFormData.email)
+    const validateVaccineHistoryForErrors = () => {
+        /* const ciErrors = adminVaccineHistoryUC.validateCI(vaccinehistoryFormData.ci)
+        const nameErrors = adminVaccineHistoryUC.validateName(vaccinehistoryFormData.name)
+        const lastnameErrors = adminVaccineHistoryUC.validateLastname(vaccinehistoryFormData.lastname)
+        const emailErrors = adminVaccineHistoryUC.validateEmail(vaccinehistoryFormData.email) */
 
-        setValidationErrors({
+        /* setValidationErrors({
             ci: ciErrors,
             name: nameErrors,
             lastname: lastnameErrors,
             email: emailErrors
-        })
+        }) */
     }
 
-    const handleUpdateButton = async () => {
-        validateUserForErrors()
-
-        const validationErrorMessages = adminUserUC.validateUser(userFormData)
-        if (validationErrorMessages.length > 0) {
-            let validationError = "Error in User data:\n"
-            validationErrorMessages.forEach( errorMessage => validationError += (errorMessage + ".\n"))
-            setSnackbarMessage(validationError)
-            setSnackbarSeverity("error")
-            setSnackbarVisibility(true)
-            return
-        }
+    const handleRegisterButton = async () => {
+        validateVaccineHistoryForErrors()
 
         try {
-            const newUser = await adminUserUC.update(JSON.parse(JSON.stringify(userFormData)));
-            if (newUser === null) {
-                setSnackbarMessage("Failed to update: Internal Error")
-                setSnackbarSeverity("error")
-                setSnackbarVisibility(true)
-                return
-            }
-            setSnackbarMessage("User updated succesfully")
-            setSnackbarSeverity("success")
-            setSnackbarVisibility(true)
+            let vaccinehistoryToRegister = JSON.parse(JSON.stringify(vaccinehistoryFormData)) as VaccineHistory;
 
-            setUserFormData(new User("", "", "", "", defaultRoleId))
+            setVaccineHistoryFormData(new VaccineHistory(defaultVaccineeId, 1, ""))
             props.handleVisibility(false)
-            props.handleFinishAction()
+            props.handleFinishAction(vaccinehistoryToRegister)
         } catch ( error ) {
             console.log(error)
-            setSnackbarMessage("Failed to update: Internal Error")
+            setSnackbarMessage("Failed to register: Internal Error")
             setSnackbarSeverity("error")
             setSnackbarVisibility(true)
         }
     }
 
-    const [roles, setRoles] = React.useState<Rol[]>([]);
+    const [vaccines, setVaccines] = React.useState<Vaccine[]>([]);
 
     React.useEffect(() => {
-        rolRepo.list()
-            .then((roles) => {
-                setRoles(roles);
+        vaccineRepo.list()
+            .then((vaccines: Vaccine[]) => {
+                setVaccines(vaccines);
             })
-            .catch(err => console.log(err))
-        
-        setUserFormData(JSON.parse(JSON.stringify(props.user)))
-    }, [props.user])
+            .catch((err: string) => {console.log(err)})
+    }, [])
 
     return (
         <div>
@@ -145,73 +113,46 @@ const ModalEdit : React.FC<ModalEditProps> = (props) => {
                                 <Close></Close>
                             </IconButton>
                         }
-                        title="Update User"
+                        title="Register VaccineHistory"
                     />
                     <Divider />
                     <CardContent className='flex column items-center'>
                         <Grid container spacing={2}>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12}>
                                 <FormControl fullWidth>
-                                    <InputLabel htmlFor="outlined-adornment-ci">CI</InputLabel>
-                                    <OutlinedInput
-                                        id="outlined-adornment-ci"
-                                        type="text"
-                                        value={userFormData.ci}
-                                        onChange={handleChange('ci')}
-                                        startAdornment={
-                                            <InputAdornment position="start">
-                                                <Badge></Badge>
-                                            </InputAdornment>
-                                        }
-                                        label="CI"
-                                        inputProps={{ inputMode: 'numeric', pattern: '[0-9]*', maxLength: 10 }}
-                                        error={validationErrors.ci.length > 0}
-                                    />
-                                    {
-                                        validationErrors.ci.length === 0 ? <div></div> :
-                                        <FormHelperText error id="ci-error">
-                                            { validationErrors.ci.reduce((error, currentError) => {
-                                                return currentError + (". " + error)
-                                            }, "") }
-                                        </FormHelperText>
-                                    }
-                                </FormControl>
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <FormControl fullWidth>
-                                    <InputLabel htmlFor="outlined-adornment-rol">Rol</InputLabel>
+                                    <InputLabel htmlFor="outlined-adornment-vaccine">Vaccine</InputLabel>
                                     <Select
-                                        labelId="demo-simple-select-rol"
-                                        id="demo-simple-rol"
-                                        label="Rol"
-                                        value={userFormData.rolId.toString()}
-                                        onChange={handleChangeSelect('rolId')}
+                                        labelId="demo-simple-select-vaccine"
+                                        id="demo-simple-vaccine"
+                                        label="Vaccine"
+                                        value={vaccinehistoryFormData.vaccineId.toString()}
+                                        onChange={handleChangeSelect('vaccineId')}
                                         startAdornment={
                                             <InputAdornment position="start">
-                                                <SupervisedUserCircle></SupervisedUserCircle>
+                                                <Category></Category>
                                             </InputAdornment>
                                         }
                                     >
                                         {
-                                            roles.map(rol => <MenuItem value={rol.id} key={rol.id}>{rol.name}</MenuItem>)
+                                            vaccines.map(vaccine => <MenuItem value={vaccine.id} key={vaccine.id}>{vaccine.name}</MenuItem>)
                                         }
                                     </Select>
                                 </FormControl>
                             </Grid>
                             <Grid item xs={12} md={6}>
                                 <FormControl fullWidth>
-                                    <InputLabel htmlFor="outlined-adornment-name">Name</InputLabel>
+                                    <InputLabel htmlFor="outlined-adornment-dosis-number">Dosis Number</InputLabel>
                                     <OutlinedInput
-                                        id="outlined-adornment-name"
+                                        id="outlined-adornment-dosis-number"
                                         type="text"
-                                        value={userFormData.name}
-                                        onChange={handleChange('name')}
+                                        value={vaccinehistoryFormData.dosisNumber}
+                                        onChange={handleChange('dosisNumber')}
                                         startAdornment={
                                             <InputAdornment position="start">
-                                                <TextFields></TextFields>
+                                                <Numbers></Numbers>
                                             </InputAdornment>
                                         }
-                                        label="Name"
+                                        label="Dosis Number"
                                         error={validationErrors.name.length > 0}
                                     />
                                     {
@@ -226,18 +167,18 @@ const ModalEdit : React.FC<ModalEditProps> = (props) => {
                             </Grid>
                             <Grid item xs={12} md={6}>
                                 <FormControl fullWidth>
-                                    <InputLabel htmlFor="outlined-adornment-name">Last Name</InputLabel>
+                                    <InputLabel htmlFor="outlined-adornment-date">Date</InputLabel>
                                     <OutlinedInput
-                                        id="outlined-adornment-lastname"
+                                        id="outlined-adornment-date"
                                         type="text"
-                                        value={userFormData.lastname}
-                                        onChange={handleChange('lastname')}
+                                        value={vaccinehistoryFormData.vaccinationDate}
+                                        onChange={handleChange('vaccinationDate')}
                                         startAdornment={
                                             <InputAdornment position="start">
-                                                <TextFields></TextFields>
+                                                <Event></Event>
                                             </InputAdornment>
                                         }
-                                        label="Last Name"
+                                        label="Date"
                                         error={validationErrors.lastname.length > 0}
                                     />
                                     {
@@ -250,13 +191,13 @@ const ModalEdit : React.FC<ModalEditProps> = (props) => {
                                     }
                                 </FormControl>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            {/* <Grid item xs={12} md={6}>
                                 <FormControl fullWidth>
                                     <InputLabel htmlFor="outlined-adornment-name">Email</InputLabel>
                                     <OutlinedInput
                                         id="outlined-adornment-email"
                                         type="text"
-                                        value={userFormData.email}
+                                        value={vaccinehistoryFormData.email}
                                         onChange={handleChange('email')}
                                         startAdornment={
                                             <InputAdornment position="start">
@@ -275,7 +216,7 @@ const ModalEdit : React.FC<ModalEditProps> = (props) => {
                                         </FormHelperText>
                                     }
                                 </FormControl>
-                            </Grid>
+                            </Grid> */}
                         </Grid>
                     </CardContent>
                     <Divider />
@@ -289,9 +230,9 @@ const ModalEdit : React.FC<ModalEditProps> = (props) => {
                         <Button
                             variant="contained"
                             color='success'
-                            onClick={handleUpdateButton}
+                            onClick={handleRegisterButton}
                         >
-                            Update
+                            Register
                         </Button>
                     </CardActions>
                 </Card>
@@ -301,4 +242,4 @@ const ModalEdit : React.FC<ModalEditProps> = (props) => {
     )
 }
 
-export default ModalEdit
+export default ModalVaccinationAdd

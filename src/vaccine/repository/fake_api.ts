@@ -13,7 +13,7 @@ export class VaccineFakeAPIRepo implements VaccineRepository {
         let vaccines: Vaccine[] = JSON.parse(localStorage.getItem("vaccines") || this.defaultVaccines) as Vaccine[];
         
         let vaccine = vaccines.find( (vaccine: Vaccine) => vaccine.id = id) as Vaccine;
-        if (vaccine == null) {
+        if (vaccine === null) {
             throw new Error("vaccine not found");
         }
         

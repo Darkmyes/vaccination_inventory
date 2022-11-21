@@ -9,6 +9,7 @@ import { AdminUserUC } from '../../usecase/admin_usecase';
 import { User } from '../../../domain/user';
 import ModalAdd from '../components/modal_add';
 import ModalDelete from '../components/modal_delete';
+import ModalEdit from '../components/modal_edit';
 
 const userRepo = new UserFakeAPIRepo();
 const adminUserUC = new AdminUserUC(userRepo);
@@ -32,7 +33,7 @@ const AdminPage = () => {
         setUsers(users);
     }
 
-    const [userSelected, setUserSelected] = React.useState<User | null>(null);
+    const [userSelected, setUserSelected] = React.useState<User>(new User("", "", "", "", 0));
     const [usersSelected, setUsersSelected] = React.useState<User[]>([]);
     const [selectionModel, setSelectionModel] = React.useState<GridSelectionModel>([]);
 
@@ -40,12 +41,12 @@ const AdminPage = () => {
         let userSelected = users.find( userInArray => userInArray.id === selectionModel[0] )        
         setUserSelected(JSON.parse(JSON.stringify(userSelected)))
 
+        console.log(userSelected)
         setEditModalVisibility(true)
     }
 
     const openDeleteModal = () => {
         let usersSelectedInTable = users.filter( userInArray => selectionModel.includes(userInArray.id) )
-        console.log(usersSelectedInTable)
         setUsersSelected(JSON.parse(JSON.stringify(usersSelectedInTable)))
 
         setDeleteModalVisibility(true)
@@ -74,22 +75,26 @@ const AdminPage = () => {
                 handleFinishAction={getUsers}
             ></ModalAdd>
 
-            {/* {
-                selectionModel.length !== 1 ? <div></div> : 
-                <ModalEdit
-                    visibility={editModalVisibility}
-                    handleVisibility={setEditModalVisibility}
-                    handleFinishAction={getUsers}
-                    user={userSelected}
-                ></ModalEdit>
-            } */}
+            <ModalEdit
+                visibility={editModalVisibility}
+                handleVisibility={setEditModalVisibility}
+                handleFinishAction={() => {
+                    setSelectionModel([])
+                    getUsers()
+                }}
+                user={userSelected}
+            ></ModalEdit>
 
             {
                 usersSelected.length === 0 ? <div></div> : 
                 <ModalDelete
                     visibility={deleteModalVisibility}
                     handleVisibility={setDeleteModalVisibility}
-                    handleFinishAction={getUsers}
+                    handleFinishAction={() => {
+                        setSelectionModel([])
+                        setUsersSelected([])
+                        getUsers()
+                    }}
                     users={usersSelected}
                 ></ModalDelete>
             }
@@ -110,9 +115,9 @@ const AdminPage = () => {
                         sx={{ m: 1 }}
                         variant="contained"
                         color='warning'
-                        onClick={() => setEditModalVisibility(true)}
+                        onClick={openEditModal}
                         startIcon={<Edit />}
-                        disable={selectionModel.length ====mango}
+                        disabled={selectionModel.length !== 1}
                     >
                         Edit
                     </Button>
@@ -122,11 +127,19 @@ const AdminPage = () => {
                         color='error'
                         onClick={openDeleteModal}
                         startIcon={<Delete />}
+                        disabled={selectionModel.length === 0}
                     >
                         Delete
                     </Button>
                 </div>
             </div>
+
+            <div className='flex items-center'>
+                Vaccination State
+                Vaccination Type
+                Vaccination Range Time
+            </div>
+
             <div style={{ minHeight: "400px", height: 400, width: '100%' }}>
                 <DataGrid
                     rows={users}

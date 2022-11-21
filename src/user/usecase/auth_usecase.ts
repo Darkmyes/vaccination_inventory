@@ -16,13 +16,13 @@ export class AuthUserUC implements AuthUserUsecase {
     }
 
     async logout (): Promise<boolean> {
-        localStorage.deleteItem("user_token")
+        localStorage.removeItem("user_token")
         return true
     }
 
     async getUserByToken (): Promise<User | null> {
         const savedToken = localStorage.getItem("user_token") || null
-        if (savedToken == null) {
+        if (savedToken === null) {
             return null
         }
 

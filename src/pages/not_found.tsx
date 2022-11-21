@@ -1,27 +1,33 @@
 import * as React from 'react';
-import { Box, Button } from "@mui/material";
-
+import { Button, Card, CardContent } from "@mui/material";
 import { useNavigate } from 'react-router-dom';
 
 const NotFoundPage = () => {
     const navigate = useNavigate()
 
     return (
-        <Box className="cont_principal">
-            <div className="cont_error">
-                <h2>404</h2>
-                <p>Oops!!, The page you are looking for does not exist.</p>
-                <Button
-                    onClick={() => navigate("/")}
-                    variant="outlined"
-                    sx={{ fontWeight: "bolder", color: "rgb(0 174 79)" }}
+        <Card
+            sx={{
+                position: 'absolute' as 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                minWidth: '275px'
+            }}
                 >
-                    Go to Home Page
-                </Button>
-            </div>
-            <div className="cont_aura_1"></div>
-            <div className="cont_aura_2"></div>
-        </Box>
+                    <CardContent className='flex column items-center'>
+                        <h2>404 Error</h2>
+                        <p>Oops!! The page you are looking for does not exist.</p>
+                        <Button
+                            onClick={() => navigate("/")}
+                            variant="contained"
+                            color="success"
+                            sx={{ fontWeight: "bolder" }}
+                        >
+                            Go to Home Page
+                        </Button>
+                    </CardContent>
+                </Card>
     )
 }
 

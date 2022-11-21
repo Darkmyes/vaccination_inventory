@@ -5,9 +5,9 @@ export class VaccineHistory {
     vaccineId: number;
     vaccine?: Vaccine;
     dosisNumber: number;
-    vaccinationDate: number;
+    vaccinationDate: string;
 
-    constructor ( vaccine_id: number, dosisNumber: number, vaccinationDate: number) {
+    constructor ( vaccine_id: number, dosisNumber: number, vaccinationDate: string) {
         this.id = 0;
         this.vaccineId = vaccine_id;
         this.dosisNumber = dosisNumber;

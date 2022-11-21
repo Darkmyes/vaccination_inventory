@@ -86,7 +86,7 @@ const ModalDelete : React.FC<ModalDeleteProps> = (props) => {
                                     props.users === null ? <div></div>:
                                     props.users.map( user => <div key={user.id}>
                                         <b>Nombre:</b> { user.name } { user.lastname } <br></br>
-                                        <b>CI:</b> { user.ci }
+                                        <b>CI:</b> { user.ci }<br></br><br></br>
                                     </div>)
                                 }
                             </Grid>

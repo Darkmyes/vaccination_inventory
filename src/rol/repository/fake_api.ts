@@ -13,7 +13,7 @@ export class RolFakeAPIRepo implements RolRepository {
         let roles: Rol[] = JSON.parse(localStorage.getItem("roles") || this.defaultRoles) as Rol[];
 
         let rol = roles.find( (rol: Rol) => rol.id = id) as Rol;
-        if (rol == null) {
+        if (rol === null) {
             throw new Error("rol not found");
         }
         

@@ -37,7 +37,7 @@ export class AdminUserUC implements AdminUserUsecase {
         let lastnameSpaceIndex = user.lastname.indexOf(" ");
         let lastnameFinalIndex = lastnameSpaceIndex !== undefined && lastnameSpaceIndex > 0 ? lastnameSpaceIndex : user.lastname.length;
 
-        let username = `${user.name.slice(0, 2)}${user.lastname.slice(0, lastnameFinalIndex)}.${user.ci.slice(-4)}`
+        let username = `${user.name.toLowerCase().slice(0, 2)}${user.lastname.toLowerCase().slice(0, lastnameFinalIndex)}.${user.ci.slice(-4)}`
         let password = window.btoa( encodeURIComponent( new Date().getTime().toString() ) );
 
         return { username, password }
